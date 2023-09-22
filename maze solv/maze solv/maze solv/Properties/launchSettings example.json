@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "maze solv": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "API_TOKEN": "<<TOKEN HERE>>"
+      }
+    }
+  }
+}
