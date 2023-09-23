@@ -12,7 +12,7 @@ namespace maze_solv
         const int MAX_ITERATIONS= 1000;
         IAmazeingClient AmazClient { get; set; }
         bool FinishedMaze { get; set; }
-        int Iterations { get; set; }
+        public int Iterations { get; set; }
         public Algorithm(IAmazeingClient client1)
         {
             this.AmazClient = client1;
@@ -23,7 +23,7 @@ namespace maze_solv
         public async Task backtrack(PossibleActionsAndCurrentScore? actionsAndCurrentScore,List<Direction> path)
         {
             Iterations++;
-            if(Iterations >= MAX_ITERATIONS)
+            if(Iterations >= MAX_ITERATIONS) //guard against spamming the server 
             {
                 await Console.Out.WriteLineAsync("REACHED MAX ITERATIONS "+MAX_ITERATIONS);
                 return;
