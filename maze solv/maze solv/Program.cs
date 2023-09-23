@@ -23,9 +23,10 @@ try
         var input=Console.ReadLine();
         if (input == "q" || input is null)
             break;
-        if (!int.TryParse(input, out var _))
+        if (!int.TryParse(input, out var index)|| index>=allMazes.Count)
             continue;
-        var mazeName = allMazes.ToList()[Int32.Parse(input)].Name;
+
+        var mazeName = allMazes.ToList()[index].Name;
         await EnterMaze(amazeingClient, mazeName);
 
         var info = await amazeingClient.GetPlayerInfo();
