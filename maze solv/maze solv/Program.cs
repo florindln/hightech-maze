@@ -1,16 +1,61 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using HightechICT.Amazeing.Client.Rest;
+using maze_solv;
 
-Console.WriteLine("Hello, World!");
+
+const string PLAYER_NAME = "Florin";
 
 HttpClient client = new HttpClient();
 client.DefaultRequestHeaders.Add("Authorization", $"{Environment.GetEnvironmentVariable("API_TOKEN")}");
 
+IAmazeingClient amazeingClient=new AmazeingClient("https://maze.hightechict.nl/", client);
 
-AmazeingClient amazeingClient=new AmazeingClient("https://maze.hightechict.nl/", client);
 
-Console.WriteLine("all mazes:");
-var allMazes= await amazeingClient.AllMazes();
+try
+{
+    Console.WriteLine("Registering with name "+PLAYER_NAME);
+    await amazeingClient.RegisterPlayer(PLAYER_NAME);
+    var allMazes = await testMazes(amazeingClient);
 
-foreach (var maze in allMazes)
-    Console.WriteLine($"[{maze.Name}] has a potential reward of [{maze.PotentialReward}] and contains [{maze.TotalTiles}] tiles;");
+    while (true)
+    {
+        Console.WriteLine("\nType maze index to enter or q to exit");
+        var input=Console.ReadLine();
+        if (input == "q" || input is null)
+            break;
+        if (!int.TryParse(input, out var _))
+            continue;
+        var mazeName = allMazes.ToList()[Int32.Parse(input)].Name;
+        await EnterMaze(amazeingClient, mazeName);
+
+        var info = await amazeingClient.GetPlayerInfo();
+        Console.WriteLine("\n"+PLAYER_NAME + " has score " + info?.PlayerScore);
+    }
+}
+catch (Exception e)
+{
+    Console.WriteLine(e.Message);
+}
+finally
+{
+    await amazeingClient.ForgetPlayer();
+}
+
+static async Task<ICollection<MazeInfo>> testMazes(IAmazeingClient amazeingClient)
+{
+    Console.WriteLine("All mazes:");
+    var allMazes = await amazeingClient.AllMazes();
+    int index = 0;
+    foreach (var myMaze in allMazes)
+        Console.WriteLine($"{index++} [{myMaze.Name}] has a potential reward of [{myMaze.PotentialReward}] and contains [{myMaze.TotalTiles}] tiles;");
+
+    return allMazes;
+}
+
+static async Task EnterMaze(IAmazeingClient amazeingClient, string mazeName)
+{
+    Console.WriteLine("\nEntering " + mazeName);
+    var actionsAndCurrentScore = await amazeingClient.EnterMaze(mazeName);
+    Algorithm algorithm = new Algorithm(amazeingClient);
+    await algorithm.backtrack(actionsAndCurrentScore, new List<Direction>());
+}
